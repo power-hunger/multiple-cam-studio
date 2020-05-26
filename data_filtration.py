@@ -49,9 +49,9 @@ def rotate_cam():
                 z = json_data[frame]["skeletons"][0][point]["z"]
                 x_rotated, y_rotated, z_rotated = rotate_point(x, y, z, cam_degrees)
 
-                x_rot_n_sub = x_rotated + cam_x
-                y_rot_n_sub = y_rotated + cam_y
-                z_rot_n_sub = z_rotated + cam_z
+                x_rot_n_sub = x_rotated + cam_y
+                y_rot_n_sub = y_rotated + cam_z
+                z_rot_n_sub = z_rotated + cam_x
 
                 if "confidence" in json_data[frame]["skeletons"][0][point]:
 
