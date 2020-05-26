@@ -5,7 +5,7 @@ import mpl_toolkits.mplot3d.axes3d as p3
 import matplotlib.animation as animation
 import json
 
-CAM_SERIALS = [ '951422062948', '950122060940']
+CAM_SERIALS = ['950122060941', '950122060940', '951422060619', '951422063135', '951422062948', '951422061191']
 
 def generate_data(nbr_iterations, nbr_elements, cam_data):
     """
@@ -111,7 +111,7 @@ def main(data, cam_data, save=False):
     if save:
         Writer = animation.writers['ffmpeg']
         writer = Writer(fps=20, metadata=dict(artist='Me'), bitrate=1800, extra_args=['-vcodec', 'libx264'])
-        ani.save(cam_data + '_rotated.mp4', writer=writer)
+        ani.save('videos/' + cam_data + '_rotated.mp4', writer=writer)
 
     plt.show()
 
