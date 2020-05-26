@@ -2,8 +2,8 @@ import numpy as np
 import json
 from scipy.spatial import transform
 
-CAM_SERIALS_N_DEGREES = {'950122060941': 0, '951422062948': -60, '951422060619': -120,
-               '951422063135': -180, '950122060940': -240, '951422061191': -300}
+CAM_SERIALS_N_DEGREES = {'950122060941': 0, '951422062948': -240, '951422060619': -120,
+               '951422063135': -180, '950122060940': -60, '951422061191': -300}
 
 
 def rotate_point(x, y, z, degrees):
