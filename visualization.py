@@ -5,13 +5,13 @@ import mpl_toolkits.mplot3d.axes3d as p3
 import matplotlib.animation as animation
 import json
 
-CAM_SERIALS = ['950122060941', '950122060940', '951422060619', '951422063135', '951422062948', '951422061191']
-LIMB_KEY_POINTS = {{1, 2}, {1, 5}, {2, 3}, {3, 4}, {5, 6}, {6, 7}, {1, 8}, {8, 9}, {9, 10}, {1, 11}, {11, 12}, {12, 13}, {1, 0}, {0, 14}, {14, 16}, {0, 15}, {15, 17}};
+CAM_SERIALS = ['950122060941']
+#LIMB_KEY_POINTS = {{1, 2}, {1, 5}, {2, 3}, {3, 4}, {5, 6}, {6, 7}, {1, 8}, {8, 9}, {9, 10}, {1, 11}, {11, 12}, {12, 13}, {1, 0}, {0, 14}, {14, 16}, {0, 15}, {15, 17}};
 
 
 def generate_data(cam_serial):
 
-    with open('results/' + cam_serial + '_rotated.json') as f:
+    with open('top_point_json.json') as f:
         json_data = json.load(f)
 
     data_list = []
@@ -87,8 +87,8 @@ def main(data, cam_serial):
                                        interval=50, blit=False, repeat=True)
 
     Writer = animation.writers['ffmpeg']
-    writer = Writer(fps=20, metadata=dict(artist='Me'), bitrate=1800, extra_args=['-vcodec', 'libx264'])
-    ani.save('videos/' + cam_serial + '_rotated.mp4', writer=writer)
+    writer = Writer(fps=1, metadata=dict(artist='Me'), bitrate=1800, extra_args=['-vcodec', 'libx264'])
+    ani.save('videos/top_test.mp4', writer=writer)
 
     plt.show()
 
