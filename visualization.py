@@ -6,35 +6,12 @@ import matplotlib.animation as animation
 import json
 
 CAM_SERIALS = ['950122060941', '950122060940', '951422060619', '951422063135', '951422062948', '951422061191']
+LIMB_KEY_POINTS = {{1, 2}, {1, 5}, {2, 3}, {3, 4}, {5, 6}, {6, 7}, {1, 8}, {8, 9}, {9, 10}, {1, 11}, {11, 12}, {12, 13}, {1, 0}, {0, 14}, {14, 16}, {0, 15}, {15, 17}};
 
-def generate_data(nbr_iterations, nbr_elements, cam_data):
-    """
-    Generates dummy data.
-    The elements will be assigned random initial positions and speed.
-    Args:
-        nbr_iterations (int): Number of iterations data needs to be generated for.
-        nbr_elements (int): Number of elements (or points) that will move.
-    Returns:
-        list: list of positions of elements. (Iterations x (# Elements x Dimensions))
-    """
-    dims = (3,1)
 
-    # Random initial positions.
-    gaussian_mean = np.zeros(dims)
-    gaussian_std = np.ones(dims)
-    start_positions = np.array(list(map(np.random.normal, gaussian_mean, gaussian_std, [nbr_elements] * dims[0]))).T
+def generate_data(cam_serial):
 
-    # Random speed
-    start_speed = np.array(list(map(np.random.normal, gaussian_mean, gaussian_std, [nbr_elements] * dims[0]))).T
-
-    # Computing trajectory
-    data = [start_positions]
-    for iteration in range(nbr_iterations):
-        previous_positions = data[-1]
-        new_positions = previous_positions + start_speed
-        data.append(new_positions)
-
-    with open('results/' + cam_data + '_rotated.json') as f:
+    with open('results/' + cam_serial + '_rotated.json') as f:
         json_data = json.load(f)
 
     data_list = []
@@ -47,15 +24,14 @@ def generate_data(nbr_iterations, nbr_elements, cam_data):
                                  json_data[frame]['skeletons'][0][point]['z']])
         data_list.append(dynamic_list)
 
-
-    new_list = []
+    data_list_array = []
     for index in range(len(data_list)):
         npa = np.asarray(data_list[index], dtype=np.float64)
-        new_list.append(npa)
+        data_list_array.append(npa)
         print(data_list[index])
 
+    return data_list_array
 
-    return new_list
 
 def animate_scatters(iteration, data, scatters):
     """
@@ -69,9 +45,11 @@ def animate_scatters(iteration, data, scatters):
     """
     for i in range(data[0].shape[0]):
         scatters[i]._offsets3d = (data[iteration][i,0:1], data[iteration][i,1:2], data[iteration][i,2:])
+
     return scatters
 
-def main(data, cam_data, save=False):
+
+def main(data, cam_serial):
     """
     Creates the 3D figure and animates it with the input data.
     Args:
@@ -108,15 +86,14 @@ def main(data, cam_data, save=False):
     ani = animation.FuncAnimation(fig, animate_scatters, iterations, fargs=(data, scatters),
                                        interval=50, blit=False, repeat=True)
 
-    if save:
-        Writer = animation.writers['ffmpeg']
-        writer = Writer(fps=20, metadata=dict(artist='Me'), bitrate=1800, extra_args=['-vcodec', 'libx264'])
-        ani.save('videos/' + cam_data + '_rotated.mp4', writer=writer)
+    Writer = animation.writers['ffmpeg']
+    writer = Writer(fps=20, metadata=dict(artist='Me'), bitrate=1800, extra_args=['-vcodec', 'libx264'])
+    ani.save('videos/' + cam_serial + '_rotated.mp4', writer=writer)
 
     plt.show()
 
 
-for cam_data in CAM_SERIALS:
-    print("Creating video for: " + cam_data)
-    data = generate_data(2, 1, cam_data)
-    main(data, cam_data, save=True)
+for cam_serial in CAM_SERIALS:
+    print("Creating video for: " + cam_serial)
+    data = generate_data(cam_serial)
+    main(data, cam_serial)
