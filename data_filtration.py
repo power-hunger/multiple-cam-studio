@@ -116,7 +116,7 @@ def pick_top_point():
                     for point in range(len(cam_points[frame]["skeletons"][0])):
 
                         if top_point_json[top_point_frame]["skeletons"][0][point]["confidence"] < cam_points[frame]["skeletons"][0][point]["confidence"]:
-
+                            top_point_json[top_point_frame]["skeletons"][0][point]["confidence"] = cam_points[frame]["skeletons"][0][point]["confidence"]
                             top_point_json[top_point_frame]["skeletons"][0][point]["x"] = cam_points[frame]["skeletons"][0][point]["x"]
                             top_point_json[top_point_frame]["skeletons"][0][point]["y"] = cam_points[frame]["skeletons"][0][point]["y"]
                             top_point_json[top_point_frame]["skeletons"][0][point]["z"] = cam_points[frame]["skeletons"][0][point]["z"]
