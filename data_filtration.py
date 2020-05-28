@@ -1,7 +1,6 @@
 import numpy as np
 import json
 from scipy.spatial import transform
-from datetime import datetime
 
 CAM_SERIALS_N_CALIBRATION = {'950122060941': {'degrees': 0, 'x': 0, 'y': 0, 'z': 0},
                              '950122060940': {'degrees': -60.5, 'x': 1.30875, 'y': 2.4, 'z': -0.0218},
@@ -76,7 +75,7 @@ def rotate_cam():
             the_file.write(json_dump)
 
 
-def create_toppoint_placeholder():
+def create_top_point_placeholder():
     empty_top_point_json = []
     for empty_frame in range(START_TIME, END_TIME):
         runner_list = []
@@ -85,22 +84,11 @@ def create_toppoint_placeholder():
 
         empty_top_point_json.append({"skeletons": [runner_list], "timestamp": empty_frame})
 
-    json_dump = json.dumps(empty_top_point_json)
-    with open('empty_top_point_json.json', 'w+') as the_file:
-        the_file.write(json_dump)
+    return empty_top_point_json
 
 
 def pick_top_point():
-
-
-    top_point_json = []
-    for empty_frame in range(START_TIME, END_TIME):
-        runner_list = []
-        for empty_point in range(18):
-            runner_list.append({"confidence": 0, "x": 0, "y": 0, "z": 0})
-
-        top_point_json.append({"skeletons": [runner_list], "timestamp": empty_frame})
-
+    top_point_json = create_top_point_placeholder()
 
     for cam_serial in CAM_SERIALS_N_CALIBRATION:
         with open('results/' + cam_serial + '_rotated.json') as f:
@@ -120,52 +108,81 @@ def pick_top_point():
                             top_point_json[top_point_frame]["skeletons"][0][point]["x"] = cam_points[frame]["skeletons"][0][point]["x"]
                             top_point_json[top_point_frame]["skeletons"][0][point]["y"] = cam_points[frame]["skeletons"][0][point]["y"]
                             top_point_json[top_point_frame]["skeletons"][0][point]["z"] = cam_points[frame]["skeletons"][0][point]["z"]
-
+                    # check only first frame (1 FPS)
                     break
 
             top_point_frame = top_point_frame + 1
 
     json_dump = json.dumps(top_point_json)
-    with open('top_point_json.json', 'w+') as the_file:
+    with open('results/top_point_json_1fps.json', 'w+') as the_file:
         the_file.write(json_dump)
 
 
+def create_1_fps_data():
+    for cam_serial in CAM_SERIALS_N_CALIBRATION:
+        with open('results/' + cam_serial + '_rotated.json') as f:
+            cam_points = json.load(f)
+        top_point_json = create_top_point_placeholder()
+        top_point_frame = 0
+        for time in range(START_TIME, END_TIME):
+            for frame in range(len(cam_points)):
+                if cam_points[frame]["timestamp"] == time:
+                    for point in range(len(cam_points[frame]["skeletons"][0])):
+                        if top_point_json[top_point_frame]["skeletons"][0][point]["confidence"] < \
+                                cam_points[frame]["skeletons"][0][point]["confidence"]:
+                            top_point_json[top_point_frame]["skeletons"][0][point]["confidence"] = \
+                            cam_points[frame]["skeletons"][0][point]["confidence"]
+                            top_point_json[top_point_frame]["skeletons"][0][point]["x"] = \
+                            cam_points[frame]["skeletons"][0][point]["x"]
+                            top_point_json[top_point_frame]["skeletons"][0][point]["y"] = \
+                            cam_points[frame]["skeletons"][0][point]["y"]
+                            top_point_json[top_point_frame]["skeletons"][0][point]["z"] = \
+                            cam_points[frame]["skeletons"][0][point]["z"]
+                    # check only first frame (1 FPS)
+                    break
+
+            top_point_frame = top_point_frame + 1
+
+        json_dump = json.dumps(top_point_json)
+        with open('1fps_results/' + cam_serial + '_1fps.json', 'w+') as the_file:
+            the_file.write(json_dump)
 
 
+def get_conf(cam_points):
+    conf_list = []
+    for frame in range(len(cam_points)):
+        for point in range(len(cam_points[frame]["skeletons"][0])):
+            conf_list.append(cam_points[frame]["skeletons"][0][point]["confidence"])
 
-    # for i in range(START_TIME, END_TIME):
-    #
-    #     for frame in range(len(camera_data[0])):
-    #         if i == json_data[frame]["timestamp"]:
-    #             print(json_data[frame]["timestamp"])
-    #
-    #             for point in range(len(json_data[frame]["skeletons"][0])):
-    #
-    #                 x = json_data[frame]["skeletons"][0][point]["x"]
-    #                 y = json_data[frame]["skeletons"][0][point]["y"]
-    #                 z = json_data[frame]["skeletons"][0][point]["z"]
-    #
-    #             # if conf < 0
-    #
-    #             # we are looking only at first frame in second (1FPS)
-    #             break
+    # removing first 90 sec because of setting up the env and not doing exercise
+    conf_list = conf_list[1620:]
+    return sum(conf_list) / len(conf_list)
 
 
+def get_avg_conf_of_cams():
 
-    
+    avg_conf_list = []
+    for cam_serial in CAM_SERIALS_N_CALIBRATION:
+        with open('1fps_results/' + cam_serial + '_1fps.json') as f:
+            cam_points = json.load(f)
 
+        avg_conf = get_conf(cam_points)
+        avg_conf_list.append(avg_conf)
+        print("Camera with serial number: " + cam_serial + " avg confidence is: " + str(avg_conf))
 
+    print("Single camera's avg conf is: " + str(sum(avg_conf_list)/len(avg_conf_list)))
 
-        
-        
-        
-        # print(x)
-
+    with open('1fps_results/top_point_json_1fps.json') as f:
+        cam_points = json.load(f)
+    print("All camera avg conf is: " + str(get_conf(cam_points)))
 
 
 def main():
     # rotate_cam()
-    pick_top_point()
+    # pick_top_point()
+    # create_1_fps_data()
+    get_avg_conf_of_cams()
+
 
 
 

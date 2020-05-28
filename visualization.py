@@ -11,7 +11,7 @@ CAM_SERIALS = ['950122060941']
 
 def generate_data(cam_serial):
 
-    with open('top_point_json.json') as f:
+    with open('top_point_json_1fps.json') as f:
         json_data = json.load(f)
 
     data_list = []
